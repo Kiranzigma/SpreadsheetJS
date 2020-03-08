@@ -31,10 +31,9 @@
 **Steps**
 
 * git clone to directory using the line https://github.com/neu-mis-info6150-spring-2020/assignment-6-Kiranzigma.git
-* Run the querySelector.js in repl
 
-References:
-https://blog.benoitvallon.com/data-structures-in-javascript/the-tree-data-structure/
+
+
 
 
 
