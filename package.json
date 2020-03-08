@@ -1,0 +1,19 @@
+{
+  "name": "assignment-6-kiranzigma",
+  "version": "1.0.0",
+  "description": "Assignment-6",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neu-mis-info6150-spring-2020/assignment-6-Kiranzigma.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/neu-mis-info6150-spring-2020/assignment-6-Kiranzigma/issues"
+  },
+  "homepage": "https://github.com/neu-mis-info6150-spring-2020/assignment-6-Kiranzigma#readme"
+}
