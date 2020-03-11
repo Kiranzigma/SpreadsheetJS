@@ -578,7 +578,7 @@ uploadCSV.addEventListener("click", function () {
         if (typeof (FileReader) != "undefined") {
             var reader = new FileReader();
             reader.onload = function (e) {
-                var table = document.getElementsByTagName("table")[0];
+                var table = document.getElementById("Spreadsheet");
                 let x = table.rows;
                 for (j = 0; j < x.length; j++) {
                     // let index = j + 1;
@@ -588,12 +588,12 @@ uploadCSV.addEventListener("click", function () {
                 var body = document.getElementsByTagName("body")[0];
                 body.removeChild(table);
                 var rows = e.target.result.split("\n");
-                init_rows = rows.length;
+                no_rows = rows.length;
                 for (var i = 0; i < rows.length; i++) {
                     var cell = rows[0].split(",");
-                    if (cell.length > max_cols) {
+                    if (cell.length > max_columns) {
                         alert("Showing maximum possible columns");
-                        init_cols = max_cols;
+                        init_cols = max_columns;
                     }
                     else {
                         let temp = cell.length + 1;
@@ -601,21 +601,21 @@ uploadCSV.addEventListener("click", function () {
                     }
                 }
 
-                reload();
+                window.onload();
                 let table1 = document.getElementsByTagName("table")[0];
                 let x1 = table1.rows;
                 let r = e.target.result.split("\n");
                 //init_rows = rows.length;
-                for (let l = 0, i = 1; l < r.length, i < init_rows; i++ , l++) {
+                for (let l = 0, i = 1; l < r.length, i < no_rows; i++ , l++) {
                     var cell = r[l].split(",");
-                    if (cell.length < max_cols) {
-                        for (let k = 0, j = 1; k < cell.length, j < init_cols; k++ , j++) {
+                    if (cell.length < max_columns) {
+                        for (let k = 0, j = 1; k < cell.length, j < no_columns; k++ , j++) {
                             let y = x1[i].cells;
                             y[j].innerText = cell[k];
                         }
                     }
                     else {
-                        for (let k = 0, j = 1; k < max_cols, j < init_cols; k++ , j++) {
+                        for (let k = 0, j = 1; k < max_columns, j < no_columns; k++ , j++) {
                             let y = x1[i].cells;
                             y[j].innerText = cell[k];
                         }
