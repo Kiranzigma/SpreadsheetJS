@@ -1,13 +1,15 @@
-
+//Declaring the starting variables
 var no_rows = 11;
 var no_columns = 11;
 var max_columns = 26;
 
+//Declaring the subjects for RXJS
 const obs = new rxjs.Subject();
 const rowObs = new rxjs.Subject();
 
+//The Windows onload function for loading
 window.onload = () => {
-    console.log("Loaded");
+    //console.log("Loaded");
     let table = document.createElement("table");
     table.setAttribute("id", "Spreadsheet");
     for (let i = 0; i < no_rows; i++) {
@@ -40,11 +42,12 @@ window.onload = () => {
             else {
                 td.setAttribute("contentEditable", "true");
                 td.setAttribute("id", "Row" + i + "," + "Cell" + j);
+                //Setting rxjs fromEvent with piped operations and a debounce time
                 rxjs.fromEvent(td, 'input').pipe(rxjs.operators.debounceTime(300)).subscribe(x => {
                     if (td.innerText.toLowerCase().startsWith("=sum(") && td.innerText.endsWith(")")) {
                         let initalStr = td.innerText.substring(4, td.innerText.length);
                         let actualStr = initalStr.substring(1, initalStr.length - 1);
-                        let arr = [];
+                        let arr = []; //splitting the array according to =sum() formula
                         actualStr.split(":").forEach(x => {
                             if (x.length > 1)
                                 arr.push(x)
@@ -52,8 +55,19 @@ window.onload = () => {
                         if (arr.length == 2) {
                             sum(td, arr);
                         }
-                    } else if (td.innerText.startsWith("=", 0) && td.innerText.length >= 6) {
-                        let operator = td.innerText.charAt(3);
+                    } else if (td.innerText.startsWith("=", 0) && td.innerText.length >= 6) { // direct operations
+                        //let operator = td.innerText.charAt(3);
+                        let operator;
+                        if(td.innerText.includes("+")){
+                            operator = "+";
+                        } else if(td.innerText.includes("-")){
+                            operator = "-";
+                        } else if(td.innerText.includes("/")){
+                            operator = "/";
+                        } else if(td.innerText.includes("*")){
+                            operator = "*";
+                        }
+
                         if (operator === "+") {
                             td.setAttribute("operation", "true")
                             td.setAttribute("type", "sum")
@@ -65,12 +79,11 @@ window.onload = () => {
                         } else if (operator === "*") {
                             td.setAttribute("operation", "true")
                             td.setAttribute("type", "mul")
-
-                           operate(td, "*");
+                            operate(td, "*");
                         } else if (operator === "/") {
                             td.setAttribute("operation", "true")
                             td.setAttribute("type", "div")
-                            operate(td, "*");
+                            operate(td, "/");
                         }
                     } else if (x.inputType == "deleteContentBackward" && td.getAttribute("operation") == "true") {
                         td.removeAttribute("operation");
@@ -79,15 +92,18 @@ window.onload = () => {
                     obs.next(x.target);
                 });
             }
-
+            //appending td
             tr.appendChild(td);
         }
+        //appending tr
         table.appendChild(tr);
     }
+    // appending the table
     document.body.appendChild(table);
 }
 
-const sum = (td, arr) => {
+// the sum function for =SUM()
+const sum = (td, arr,mode) => {
     let map = new Map();
     for(i=1;i<=26;i++){
     map.set(String.fromCharCode(i + 64),'Cell'+i);
@@ -98,12 +114,12 @@ const sum = (td, arr) => {
         td.setAttribute("operation", "true")
         let start = parseInt(arr[0].substring(1, arr[0].length));
         let end = parseInt(arr[1].substring(1, arr[1].length));
-        let rowObserver = rowObs.subscribe(x => {
+        let rowObserver = rowObs.subscribe(x => { //rowObs subscription
             if (x < end && x > start) {
                 end = parseInt(end) + 1;
             }
         });
-        let observer = obs.subscribe(x => {
+        let observer = obs.subscribe(x => { //Observer multi-subscription
             if (td.getAttribute("operation")) {
                 let sum = 0;
                 for (i = start; i <= end; i++) {
@@ -111,6 +127,7 @@ const sum = (td, arr) => {
                 }
                 td.innerText = sum;
             } else {
+                //unsubscribing the capture
                 observer.unsubscribe();
                 rowObserver.unsubscribe();
             }
@@ -122,15 +139,20 @@ const sum = (td, arr) => {
                 let sum = 0;
                 let start = arr[0].charCodeAt(0);
                 let end = arr[1].charCodeAt(0);
+                let ex = map.get(arr[0].charAt(0));
+                console.log(arr[0].charAt(0));
+                let ex1 = map.get(arr[1].charAt(0));
                 let val = arr[0].substring(1, arr[0].length);
+
                 for (i = start; i <= end; i++) {
-                    sum = sum + parseInt(document.getElementById(String.fromCharCode(i) + val).innerText);
+                    console.log(String.fromCharCode(i));
+                    sum = sum + parseInt(document.getElementById("Row" + val + "," + map.get(String.fromCharCode(i))).innerText);
                 }
                 td.innerText = sum;
             } else { observer.unsubscribe() }
         });
     } else {
-        console.log("invalid");
+        console.log("Invalid");
     }
 }
 
@@ -139,11 +161,12 @@ const operate = (td, type) => {
     for(i=1;i<=26;i++){
     map.set(String.fromCharCode(i + 64),'Cell'+i);
     }   
-    let cell1 = td.innerText.substring(1, 3);
-    let cell2 = td.innerText.substring(4, 6);
+    let op_index = td.innerText.indexOf(type);
+    let cell1 = td.innerText.substring(1, op_index);
+    let cell2 = td.innerText.substring(op_index+1, td.innerText.length);
 
-    console.log("Row" + cell1.substring(1,cell1.length) + "," + map.get(cell1[0]));
-    console.log("Row" + cell2.substring(1,cell2.length) + "," + map.get(cell2[0]));
+    //console.log("Row" + cell1.substring(1,cell1.length) + "," + map.get(cell1[0]));
+    //console.log("Row" + cell2.substring(1,cell2.length) + "," + map.get(cell2[0]));
 
     let a = document.getElementById("Row" + cell1.substring(1,cell1.length) + "," + map.get(cell1[0]));
     let b = document.getElementById("Row" + cell2.substring(1,cell2.length) + "," + map.get(cell2[0]));
@@ -167,8 +190,8 @@ var addRow = document.getElementById("addRow");
 addRow.addEventListener("click", function () {
 
     if (selectedRows.length != 1 || selectedRows.length == 0) {
-        console.log("Inside Add Row");
-        console.log(selectedRows.length);
+        //console.log("Inside Add Row");
+        //console.log(selectedRows.length);
         selectedRows.forEach((element) => {
             element.classList.remove("selectedCell");
         });
@@ -180,7 +203,7 @@ addRow.addEventListener("click", function () {
         let row = selectedRows[0];
 
         let index = row.rowIndex;
-        console.log(index);
+        //console.log(index);
         let newRow = table.insertRow(index + 1);
         //newRow.setAttribute("id", "Row"+ index + ","+ "Cell"+ j);
         for (let i = 0; i < no_columns; i++) {
@@ -203,7 +226,7 @@ addRow.addEventListener("click", function () {
                         cellId = Number(element.id[9] + element.id[10]);
                     }
                     if (cellId == i) {
-                        console.log("Here");
+                        //console.log("Here");
                         newCell.setAttribute("class", "selectedCell");
                     }
                 });
@@ -222,7 +245,17 @@ addRow.addEventListener("click", function () {
                             sum(td, arr);
                         }
                     } else if (td.innerText.startsWith("=", 0) && td.innerText.length >= 6) {
-                        let operator = td.innerText.charAt(3);
+                        //let operator = td.innerText.charAt(3);
+                        let operator;
+                        if(td.innerText.includes("+")){
+                            operator = "+";
+                        } else if(td.innerText.includes("-")){
+                            operator = "-";
+                        } else if(td.innerText.includes("/")){
+                            operator = "/";
+                        } else if(td.innerText.includes("*")){
+                            operator = "*";
+                        }
                         if (operator === "+") {
                             td.setAttribute("operation", "true")
                             td.setAttribute("type", "sum")
@@ -261,16 +294,16 @@ addRow.addEventListener("click", function () {
 const selectedRows = [];
 
 const selectedRow = (x) => {
-    console.log(x);
+    //console.log(x);
     if (x.classList.contains("selectedCell")) {
         x.classList.remove("selectedCell");
         selectedRows.pop(x);
-        console.log(selectedRows);
+        //console.log(selectedRows);
     }
     else {
         x.classList.add("selectedCell");
         selectedRows.push(x);
-        console.log(selectedRows);
+        //console.log(selectedRows);
     }
 }
 
@@ -281,8 +314,8 @@ deleteRow.addEventListener("click", function () {
     }
     else
         if (selectedRows.length != 1 || selectedRows.length == 0) {
-            console.log("Inside Delete Row")
-            console.log(selectedRows.length);
+            //console.log("Inside Delete Row")
+            //console.log(selectedRows.length);
             selectedRows.forEach((element) => {
                 element.classList.remove("selectedCell");
             });
@@ -308,9 +341,9 @@ deleteColumn.addEventListener("click", function () {
     }
     else
         if (selectedColumns.size != 1 || selectedColumns.size == 0) {
-            console.log("Inside Delete Column")
+            //console.log("Inside Delete Column")
             selectedColumns.forEach((element) => {
-                console.log(element);
+                //console.log(element);
                 element.classList.remove("selectedCell");
                 for (let i = 1; i < no_rows; i++) {
                     let cellId;
@@ -340,7 +373,7 @@ deleteColumn.addEventListener("click", function () {
                 cellId = Number(column.id[9] + column.id[10]);
             }
             let x = table.rows;
-            console.log(x);
+            //console.log(x);
             for (let i = 0; i < no_rows; i++) {
                 let requiredId = "Row" + (i) + ",Cell" + cellId;
                 x[i].deleteCell(cellId);
@@ -358,9 +391,9 @@ addColumn.addEventListener("click", function () {
         alert("Cannot Add More Than 26 Columns");
     }
     else if (selectedColumns.size != 1 || selectedColumns.size == 0) {
-        console.log("Inside Add Column")
+        //console.log("Inside Add Column")
         selectedColumns.forEach((element) => {
-            console.log(element);
+            //console.log(element);
             element.classList.remove("selectedCell");
             for (let i = 1; i < no_rows; i++) {
                 let cellId;
@@ -420,7 +453,18 @@ addColumn.addEventListener("click", function () {
                             sum(td, arr);
                         }
                     } else if (td.innerText.startsWith("=", 0) && td.innerText.length >= 6) {
-                        let operator = td.innerText.charAt(3);
+                        //let operator = td.innerText.charAt(3);
+                        let operator;
+                        console.log(operator)
+                        if(td.innerText.includes("+")){
+                            operator = "+";
+                        } else if(td.innerText.includes("-")){
+                            operator = "-";
+                        } else if(td.innerText.includes("/")){
+                            operator = "/";
+                        } else if(td.innerText.includes("*")){
+                            operator = "*";
+                        }
                         if (operator === "+") {
                             td.setAttribute("operation", "true")
                             td.setAttribute("type", "sum")
@@ -447,7 +491,7 @@ addColumn.addEventListener("click", function () {
             }
         }
         selectedColumns.forEach((element) => {
-            console.log(element);
+            //console.log(element);
             element.classList.remove("selectedCell");
             for (let i = 1; i < no_rows; i++) {
                 let cellId;
@@ -471,9 +515,9 @@ addColumn.addEventListener("click", function () {
 );
 
 const IdIndexColumnDeletion = (delCol) => {
-    console.log(selectedColumns.size);
+    //console.log(selectedColumns.size);
     let table = document.getElementById("Spreadsheet");
-    console.log(delCol);
+    //console.log(delCol);
     let x = table.rows;
     for (let i = 0; i < no_rows; i++) {
         for (let j = delCol; j < no_columns; j++) {
@@ -500,18 +544,18 @@ const IdIndexingRows = (index) => {
 
 const selectedColumns = new Set();
 const selectedColumn = (x) => {
-    console.log(x);
+    //console.log(x);
     if (x.classList.contains("selectedCell")) {
         selectedColumns.delete(x);
         x.classList.remove("selectedCell");
-        console.log("Delete");
-        console.log(selectedColumns);
+        //console.log("Delete");
+        //console.log(selectedColumns);
     }
     else {
         selectedColumns.add(x);
         x.classList.add("selectedCell"); //Possible
-        console.log("Add")
-        console.log(selectedColumns);
+        //console.log("Add")
+        //console.log(selectedColumns);
     }
 
     for (let i = 1; i < no_rows; i++) {
