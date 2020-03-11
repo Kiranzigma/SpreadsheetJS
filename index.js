@@ -41,7 +41,7 @@ window.onload = () => {
                 td.setAttribute("contentEditable", "true");
                 td.setAttribute("id", "Row" + i + "," + "Cell" + j);
                 rxjs.fromEvent(td, 'input').pipe(rxjs.operators.debounceTime(300)).subscribe(x => {
-                    if (td.innerText.startsWith("=Sum(") && td.innerText.endsWith(")")) {
+                    if (td.innerText.toLowerCase().startsWith("=sum(") && td.innerText.endsWith(")")) {
                         let initalStr = td.innerText.substring(4, td.innerText.length);
                         let actualStr = initalStr.substring(1, initalStr.length - 1);
                         let arr = [];
@@ -55,25 +55,25 @@ window.onload = () => {
                     } else if (td.innerText.startsWith("=", 0) && td.innerText.length >= 6) {
                         let operator = td.innerText.charAt(3);
                         if (operator === "+") {
-                            td.setAttribute("isFormula", "true")
+                            td.setAttribute("operation", "true")
                             td.setAttribute("type", "sum")
                             operate(td, "+");
                         } else if (operator === "-") {
-                            td.setAttribute("isFormula", "true")
+                            td.setAttribute("operation", "true")
                             td.setAttribute("type", "diff")
                             operate(td, "-");
                         } else if (operator === "*") {
-                            td.setAttribute("isFormula", "true")
+                            td.setAttribute("operation", "true")
                             td.setAttribute("type", "mul")
 
                            operate(td, "*");
                         } else if (operator === "/") {
-                            td.setAttribute("isFormula", "true")
+                            td.setAttribute("operation", "true")
                             td.setAttribute("type", "div")
                             operate(td, "*");
                         }
-                    } else if (x.inputType == "deleteContentBackward" && td.getAttribute("isFormula") == "true") {
-                        td.removeAttribute("isFormula");
+                    } else if (x.inputType == "deleteContentBackward" && td.getAttribute("operation") == "true") {
+                        td.removeAttribute("operation");
                         td.removeAttribute("type");
                     }
                     obs.next(x.target);
@@ -87,7 +87,7 @@ window.onload = () => {
     document.body.appendChild(table);
 }
 
-const sum = (td, arr, mode) => {
+const sum = (td, arr) => {
     let map = new Map();
     for(i=1;i<=26;i++){
     map.set(String.fromCharCode(i + 64),'Cell'+i);
@@ -95,16 +95,16 @@ const sum = (td, arr, mode) => {
      
     if (arr[0].charAt(0) == arr[1].charAt(0)) {
         let col = map.get(arr[0].charAt(0));
-        td.setAttribute("isFormula", "true")
-        let start = arr[0].substring(1, arr[0].length);
-        let end = arr[1].substring(1, arr[1].length);
+        td.setAttribute("operation", "true")
+        let start = parseInt(arr[0].substring(1, arr[0].length));
+        let end = parseInt(arr[1].substring(1, arr[1].length));
         let rowObserver = rowObs.subscribe(x => {
             if (x < end && x > start) {
                 end = parseInt(end) + 1;
             }
         });
         let observer = obs.subscribe(x => {
-            if (td.getAttribute("isFormula")) {
+            if (td.getAttribute("operation")) {
                 let sum = 0;
                 for (i = start; i <= end; i++) {
                     sum = sum + parseInt(document.getElementById("Row" + i + "," + col).innerText);
@@ -116,9 +116,9 @@ const sum = (td, arr, mode) => {
             }
         });
     } else if (arr[0].substring(1, arr[0].length) == arr[1].substring(1, arr[1].length)) {
-        td.setAttribute("isFormula", "true") 
+        td.setAttribute("operation", "true") 
         let observer = obs.subscribe(x => {
-            if (td.getAttribute("isFormula")) {
+            if (td.getAttribute("operation")) {
                 let sum = 0;
                 let start = arr[0].charCodeAt(0);
                 let end = arr[1].charCodeAt(0);
@@ -149,13 +149,13 @@ const operate = (td, type) => {
     let b = document.getElementById("Row" + cell2.substring(1,cell2.length) + "," + map.get(cell2[0]));
     let observer = obs.subscribe(x => {
         let sum = 0;
-        if (td.getAttribute("isFormula") && td.getAttribute("type") == "sum") {
+        if (td.getAttribute("operation") && td.getAttribute("type") == "sum") {
             td.innerText = parseInt(b.innerText) + parseInt(a.innerText);
-        } else if (td.getAttribute("isFormula") && td.getAttribute("type") == "diff") {
+        } else if (td.getAttribute("operation") && td.getAttribute("type") == "diff") {
             td.innerText = parseInt(a.innerText) - parseInt(b.innerText);
-        } else if (td.getAttribute("isFormula") && td.getAttribute("type") == "mul") {
+        } else if (td.getAttribute("operation") && td.getAttribute("type") == "mul") {
             td.innerText = parseInt(a.innerText) * parseInt(b.innerText);
-        } else if (td.getAttribute("isFormula") && td.getAttribute("type") == "div") {
+        } else if (td.getAttribute("operation") && td.getAttribute("type") == "div") {
             td.innerText = parseInt(a.innerText) / parseInt(b.innerText);
         } else {
             observer.unsubscribe();
@@ -210,7 +210,7 @@ addRow.addEventListener("click", function () {
                 newCell.setAttribute("contentEditable", "true");
                 newCell.setAttribute("id", "Row" + index + "," + "Cell" + i);
                 rxjs.fromEvent(newCell, 'input').pipe(rxjs.operators.debounceTime(300)).subscribe(x => {
-                    if (td.innerText.startsWith("=Sum(") && td.innerText.endsWith(")")) {
+                    if (td.innerText.toLowerCase().startsWith("=sum(") && td.innerText.endsWith(")")) {
                         let initalStr = td.innerText.substring(4, td.innerText.length);
                         let actualStr = initalStr.substring(1, initalStr.length - 1);
                         let arr = [];
@@ -224,24 +224,24 @@ addRow.addEventListener("click", function () {
                     } else if (td.innerText.startsWith("=", 0) && td.innerText.length >= 6) {
                         let operator = td.innerText.charAt(3);
                         if (operator === "+") {
-                            td.setAttribute("isFormula", "true")
+                            td.setAttribute("operation", "true")
                             td.setAttribute("type", "sum")
                             operate(td, "+");
                         } else if (operator === "-") {
-                            td.setAttribute("isFormula", "true")
+                            td.setAttribute("operation", "true")
                             td.setAttribute("type", "diff")
                             operate(td, "-");
                         } else if (operator === "*") {
-                            td.setAttribute("isFormula", "true")
+                            td.setAttribute("operation", "true")
                             td.setAttribute("type", "mul")
                             operate(td, "*");
                         } else if (operator === "/") {
-                            td.setAttribute("isFormula", "true")
+                            td.setAttribute("operation", "true")
                             td.setAttribute("type", "div")
                             operate(td, "*");
                         }
-                    } else if (x.inputType == "deleteContentBackward" && td.getAttribute("isFormula") == "true") {
-                        td.removeAttribute("isFormula");
+                    } else if (x.inputType == "deleteContentBackward" && td.getAttribute("operation") == "true") {
+                        td.removeAttribute("operation");
                         td.removeAttribute("type");
                     }
                     obs.next(x.target);
@@ -407,8 +407,8 @@ addColumn.addEventListener("click", function () {
             else {
                 td.setAttribute("contentEditable", "true");
                 td.setAttribute("id", "Row" + (i) + ",Cell" + (cellId + 1))
-                rxjs.fromEvent(td, 'input').pipe(rxjs.operators.debounceTime(300)).subscribe(x => {
-                    if (td.innerText.startsWith("=Sum(") && td.innerText.endsWith(")")) {
+                rxjs.fromEvent(td, 'input').pipe(rxjs.operators.debounceTime(450)).subscribe(x => {
+                    if (td.innerText.toLowerCase().startsWith("=sum(") && td.innerText.endsWith(")")) {
                         let initalStr = td.innerText.substring(4, td.innerText.length);
                         let actualStr = initalStr.substring(1, initalStr.length - 1);
                         let arr = [];
@@ -422,24 +422,24 @@ addColumn.addEventListener("click", function () {
                     } else if (td.innerText.startsWith("=", 0) && td.innerText.length >= 6) {
                         let operator = td.innerText.charAt(3);
                         if (operator === "+") {
-                            td.setAttribute("isFormula", "true")
+                            td.setAttribute("operation", "true")
                             td.setAttribute("type", "sum")
                             operate(td, "+");
                         } else if (operator === "-") {
-                            td.setAttribute("isFormula", "true")
+                            td.setAttribute("operation", "true")
                             td.setAttribute("type", "diff")
                             operate(td, "-");
                         } else if (operator === "*") {
-                            td.setAttribute("isFormula", "true")
+                            td.setAttribute("operation", "true")
                             td.setAttribute("type", "mul")
                             operate(td, "*");
                         } else if (operator === "/") {
-                            td.setAttribute("isFormula", "true")
+                            td.setAttribute("operation", "true")
                             td.setAttribute("type", "div")
                             operate(td, "*");
                         }
-                    } else if (x.inputType == "deleteContentBackward" && td.getAttribute("isFormula") == "true") {
-                        td.removeAttribute("isFormula");
+                    } else if (x.inputType == "deleteContentBackward" && td.getAttribute("operation") == "true") {
+                        td.removeAttribute("operation");
                         td.removeAttribute("type");
                     }
                     obs.next(x.target);
@@ -547,7 +547,7 @@ const export_csv = (html, filename) => {
 var exportCSV = document.getElementById("exportCSV");
 exportCSV.addEventListener("click", function () {
     var html = document.querySelector("table").outerHTML;
-    export_csv(html, "table.csv");
+    export_csv(html, "Ouput.csv");
 });
 
 
@@ -602,6 +602,7 @@ uploadCSV.addEventListener("click", function () {
                 }
 
                 window.onload();
+                
                 let table1 = document.getElementsByTagName("table")[0];
                 let x1 = table1.rows;
                 let r = e.target.result.split("\n");
