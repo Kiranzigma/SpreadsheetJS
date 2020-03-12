@@ -156,6 +156,7 @@ const sum = (td, arr,mode) => {
     }
 }
 
+//the operate function with types of "/,*,-,+"
 const operate = (td, type) => {
     let map = new Map();
     for(i=1;i<=26;i++){
@@ -186,6 +187,7 @@ const operate = (td, type) => {
     });
 }
 
+//the addRow eventListener
 var addRow = document.getElementById("addRow");
 addRow.addEventListener("click", function () {
 
@@ -291,6 +293,8 @@ addRow.addEventListener("click", function () {
     }
 });
 
+
+//array Storing the selectedRows
 const selectedRows = [];
 
 const selectedRow = (x) => {
@@ -307,6 +311,8 @@ const selectedRow = (x) => {
     }
 }
 
+
+//eventListener for deleteRow
 var deleteRow = document.getElementById("deleteRow");
 deleteRow.addEventListener("click", function () {
     if (no_rows <= 2) {
@@ -334,6 +340,7 @@ deleteRow.addEventListener("click", function () {
 }
 )
 
+// eventListener for deleteColumn
 var deleteColumn = document.getElementById("deleteColumn");
 deleteColumn.addEventListener("click", function () {
     if (no_columns <= 2) {
@@ -384,6 +391,8 @@ deleteColumn.addEventListener("click", function () {
         }
 });
 
+
+//event Listener for add column
 var addColumn = document.getElementById("addColumn");
 addColumn.addEventListener("click", function () {
 
@@ -514,6 +523,7 @@ addColumn.addEventListener("click", function () {
 }
 );
 
+//ColumnIdIndexing
 const IdIndexColumnDeletion = (delCol) => {
     //console.log(selectedColumns.size);
     let table = document.getElementById("Spreadsheet");
@@ -530,6 +540,7 @@ const IdIndexColumnDeletion = (delCol) => {
     }
 }
 
+//RowIdIndexing
 const IdIndexingRows = (index) => {
     let table = document.getElementById("Spreadsheet");
     let x = table.rows;
@@ -542,6 +553,7 @@ const IdIndexingRows = (index) => {
     }
 }
 
+//Set to store the selectedColumns
 const selectedColumns = new Set();
 const selectedColumn = (x) => {
     //console.log(x);
@@ -614,6 +626,7 @@ const download_csv = (csv, filename) => {
     downloadLink.click();
 }
 
+//Upload CSV format
 var uploadCSV = document.getElementById("uploadCSV");
 uploadCSV.addEventListener("click", function () {
     var fileUpload = document.getElementById("fileUpload");
@@ -671,7 +684,7 @@ uploadCSV.addEventListener("click", function () {
             reader.readAsText(fileUpload.files[0]);
 
         } else {
-            alert("This browser does not support HTML5.");
+            alert("This browser doesn't support HTML5.");
         }
     } else {
         alert("Please upload a valid CSV file.");
